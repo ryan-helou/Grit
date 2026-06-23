@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
+/* ── Whoop-inspired token theme ──────────────────────────────────────────── */
+@theme {
+  /* surfaces */
+  --color-bg: #0b0b0c; /* Cod Gray base */
+  --color-surface: #161718; /* raised cards */
+  --color-surface-2: #1f2123; /* nested / hover */
+  --color-border: #26282b; /* hairline */
+
+  /* text */
+  --color-fg: #ffffff;
+  --color-muted: #8a8f98;
+  --color-faint: #5b6068;
+
+  /* readiness traffic-light scale */
+  --color-ready-high: #16ec06;
+  --color-ready-mid: #ffde00;
+  --color-ready-low: #ff0026;
+
+  /* exertion / activity (distinct from recovery) */
+  --color-exertion: #0093e7;
+
+  /* type roles */
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* subtle top-lit vignette for depth, fading to Cod Gray */
+  background: radial-gradient(125% 70% at 50% -15%, #16191c 0%, var(--color-bg) 55%)
+    fixed;
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* raised card surface: faint gradient + top highlight for depth */
+.card {
+  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-surface), white 4%),
+    var(--color-surface)
+  );
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+}
+
+/* small all-caps tracked mono label — the "very Whoop" eyebrow */
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--color-muted);
+}
+
+/* tabular figures for any metric number */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── motion (one subtle reveal; respect reduced-motion) ──────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
