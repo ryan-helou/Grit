@@ -1,107 +1,39 @@
 # Grit
 
-A personal, **Whoop-style** dashboard for your **Fitbit Air** — recovery, sleep, and
-strain in more depth than the consumer Google Health app. Built on the new
-**Google Health API**, installable as a **PWA**.
+*A Whoop-style recovery dashboard for the Fitbit Air, built on Google's new Health API.*
 
-> The legacy Fitbit Web API is decommissioned in **Sept 2026**; Grit targets its
-> replacement, the **Google Health API** (`health.googleapis.com/v4`).
+The consumer Google Health app shows you a number and hides the math. Grit does the
+opposite: it pulls your daily metrics out of the Google Health API (`health.googleapis.com/v4`),
+stores them, and recomputes a readiness score you can actually take apart. The old Fitbit
+Web API is being decommissioned in September 2026, so this targets its replacement.
 
----
+You sign in with Google. That single OAuth grant is both the login and the health-data
+consent, and it's gated by an email allowlist so the app can stay in Google's "testing"
+publishing mode. On first connect it backfills 90 days of history; after that a Vercel
+Cron job hits `/api/cron/sync` every three hours (`0 */3 * * *`) to reconcile the last
+seven days, with a webhook at `/api/webhooks/health` for pushes in between. Access and
+refresh tokens are encrypted at rest. With no database or OAuth configured, Grit runs
+entirely on seeded mock data and every page still renders behind a "Demo data" badge.
 
-## Run it now (demo mode)
+## What it tracks
 
-With no environment configured, Grit runs on seeded mock data — no login, no DB:
+Ten daily series feed the dashboard: HRV, resting heart rate, sleep score, time asleep,
+SpO₂, skin-temperature variation, respiratory rate, steps, and cardio load — plus a
+readiness score Grit derives itself rather than echoing the device's. Readiness starts
+from a baseline of 60 and moves with how far HRV (+/-26), resting HR (+/-20), and sleep
+(-18/+22) sit from their own means, clamped to 6–99. A score of 67+ reads as **Primed**,
+34+ as **Steady**, below that **Strained** — and the same band colors every metric card.
 
-```bash
-npm install
-npm run dev
-# open http://localhost:3000
-```
+Because it owns the raw series, Grit also surfaces things the consumer app won't: the
+Pearson correlation between last night's sleep and next-day readiness, HRV expressed as a
+z-score against your 30-day baseline, and a two-week resting-HR slope in bpm/week. The
+activity page charts your last seven days of steps against a weekly total and plots cardio
+load as training load. `/api/export` hands the whole thing back as CSV — one row per day,
+every metric a column.
 
-Everything renders (readiness ring, vitals, trends, sleep stages, activity) so you
-can shape the design before wiring real data. Pages show a **"Demo data"** badge.
+## Stack
 
----
-
-## How it works
-
-- **Next.js (App Router) + TypeScript**, one app: dashboard UI, OAuth, ingestion, sync.
-- **Neon Postgres + Drizzle ORM** for storage; **Vercel** for hosting + Cron.
-- **Sign in with Google** = login *and* health-scope consent, gated by an email
-  **allowlist** → the OAuth app stays in **"testing" mode** and skips Google's paid
-  restricted-scope security assessment.
-- Data flow: OAuth → store encrypted tokens → **backfill** history → **webhook + cron**
-  keep it fresh → dashboard reads from the DB (`lib/data.ts`). No live data? It falls
-  back to demo automatically.
-
----
-
-## Phase 0 — going from demo to real data
-
-### 1. Neon database
-1. Create a free project at <https://neon.tech>.
-2. Copy the connection string → `DATABASE_URL`.
-
-### 2. Google Cloud / OAuth
-1. <https://console.cloud.google.com> → create a project.
-2. **Enable the Google Health API** (APIs & Services → Library).
-3. **OAuth consent screen** → User type **External**, publishing status **Testing**.
-   Add your Google account under **Test users**.
-4. **Credentials → Create OAuth client ID → Web application**. Add Authorized redirect URIs:
-   - `http://localhost:3000/api/auth/callback`
-   - `https://YOUR-APP.vercel.app/api/auth/callback`
-5. Copy the client ID/secret → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
-
-### 3. Environment
-```bash
-cp .env.example .env.local
-# fill DATABASE_URL, GOOGLE_CLIENT_ID/SECRET, ALLOWED_EMAILS
-# generate secrets:
-openssl rand -hex 32   # → SESSION_SECRET
-openssl rand -hex 32   # → TOKEN_ENCRYPTION_KEY
-openssl rand -hex 32   # → CRON_SECRET
-```
-
-### 4. Database schema
-```bash
-npm run db:push      # create tables in Neon (or db:generate + db:migrate)
-```
-
-### 5. ⚠️ Verify the Google Health API specifics
-The v4 API is new; a few details are **best-guess placeholders marked `TODO(verify)`**.
-Confirm against the API reference (developers.google.com/health) and correct:
-- **OAuth scopes** — `HEALTH_SCOPES` in [`lib/google-oauth.ts`](lib/google-oauth.ts)
-- **Data-type IDs + endpoint paths** — `DATA_TYPES`, `listDaily`, `listIntraday` in
-  [`lib/health-api/client.ts`](lib/health-api/client.ts)
-- **Response shape** — `toPoints` in [`lib/health-api/normalize.ts`](lib/health-api/normalize.ts)
-- **Webhook handshake** — [`app/api/webhooks/health/route.ts`](app/api/webhooks/health/route.ts)
-
-Then `npm run dev`, sign in, and trigger a first backfill (call `backfillUser` from a
-script or hit the cron endpoint with the `CRON_SECRET`).
-
----
-
-## Deploy (Vercel)
-1. Import the repo, add all env vars (use the prod `GOOGLE_REDIRECT_URI`).
-2. `vercel.json` already schedules the reconcile cron (every 3h → `/api/cron/sync`).
-3. Register a Google Health API **webhook** pointing at
-   `https://YOUR-APP.vercel.app/api/webhooks/health`.
-
----
-
-## Sharing later (it's already multi-user-ready)
-Tokens and data are keyed per user. To add a friend: add their email to `ALLOWED_EMAILS`
-and as a Google **test user**. Note: in *testing* mode Google expires refresh tokens
-every **7 days**, so each person re-logs in ~weekly. Going public (no weekly re-login)
-requires Google OAuth verification + a paid security assessment.
-
----
-
-## Structure
-```
-app/            routes: dashboard (page/trends/sleep/activity), login, api/*
-components/     readiness ring, sparkline, cards, tab nav, chrome
-lib/            data seam, metrics config, mock data, auth, oauth, crypto, health-api/
-db/             Drizzle schema + Neon client
-```
+Next.js (App Router) and TypeScript, React 19, Neon Postgres with Drizzle ORM, Tailwind,
+hosted on Vercel and installable as a PWA. It's a personal single-user build, and a few
+Health API specifics (exact scope strings, data-type IDs, the webhook handshake) are still
+marked `TODO(verify)` against Google's reference until the v4 API is confirmed end to end.
