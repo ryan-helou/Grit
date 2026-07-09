@@ -1,6 +1,8 @@
-# Grit
+# 🫀 Grit
 
 *A Whoop-style recovery dashboard for the Fitbit Air, built on Google's new Health API.*
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
 
 The consumer Google Health app shows you a number and hides the math. Grit does the
 opposite: it pulls your daily metrics out of the Google Health API (`health.googleapis.com/v4`),
@@ -15,7 +17,7 @@ seven days, with a webhook at `/api/webhooks/health` for pushes in between. Acce
 refresh tokens are encrypted at rest. With no database or OAuth configured, Grit runs
 entirely on seeded mock data and every page still renders behind a "Demo data" badge.
 
-## What it tracks
+## 📊 What it tracks
 
 Ten daily series feed the dashboard: HRV, resting heart rate, sleep score, time asleep,
 SpO₂, skin-temperature variation, respiratory rate, steps, and cardio load — plus a
@@ -31,7 +33,7 @@ activity page charts your last seven days of steps against a weekly total and pl
 load as training load. `/api/export` hands the whole thing back as CSV — one row per day,
 every metric a column.
 
-## Stack
+## 🛠️ Stack
 
 Next.js (App Router) and TypeScript, React 19, Neon Postgres with Drizzle ORM, Tailwind,
 hosted on Vercel and installable as a PWA. It's a personal single-user build, and a few
