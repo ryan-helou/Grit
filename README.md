@@ -1,6 +1,12 @@
+<div align="center">
+
 # Grit
 
-A personal health dashboard that shows how recovered and ready you are each day, using data from a Fitbit device.
+**A personal health dashboard that shows how recovered and ready you are each day, using data from a Fitbit device.**
+
+</div>
+
+<br>
 
 Most fitness apps give you a single "readiness" number without explaining where it came from. Grit pulls your daily health readings from Google's health service (which Fitbit data now goes through), stores them, and works out its own readiness score in a way you can see and take apart. It was built by one person for their own use and is still being finished; some connections to Google's newer health service have not been fully confirmed yet.
 
