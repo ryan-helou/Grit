@@ -1,41 +1,15 @@
-# 🫀 Grit
+# Grit
 
-*A Whoop-style recovery dashboard for the Fitbit Air, built on Google's new Health API.*
+A personal health dashboard that shows how recovered and ready you are each day, using data from a Fitbit device.
 
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white) ![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?style=flat-square&logo=drizzle&logoColor=black) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
+Most fitness apps give you a single "readiness" number without explaining where it came from. Grit pulls your daily health readings from Google's health service (which Fitbit data now goes through), stores them, and works out its own readiness score in a way you can see and take apart. It was built by one person for their own use and is still being finished; some connections to Google's newer health service have not been fully confirmed yet.
 
-The consumer Google Health app shows you a number and hides the math. Grit does the
-opposite: it pulls your daily metrics out of the Google Health API (`health.googleapis.com/v4`),
-stores them, and recomputes a readiness score you can actually take apart. The old Fitbit
-Web API is being decommissioned in September 2026, so this targets its replacement.
+## What you can do with it
 
-You sign in with Google. That single OAuth grant is both the login and the health-data
-consent, and it's gated by an email allowlist so the app can stay in Google's "testing"
-publishing mode. On first connect it backfills 90 days of history; after that a Vercel
-Cron job hits `/api/cron/sync` every three hours (`0 */3 * * *`) to reconcile the last
-seven days, with a webhook at `/api/webhooks/health` for pushes in between. Access and
-refresh tokens are encrypted at rest. With no database or OAuth configured, Grit runs
-entirely on seeded mock data and every page still renders behind a "Demo data" badge.
+- See a daily readiness score labelled Primed, Steady or Strained, and what pushed it up or down.
+- Track sleep, heart rate variability (a measure of how rested your body is), resting heart rate, blood oxygen, breathing rate, steps and more.
+- Read plain-language findings, such as whether better sleep tends to lead to better readiness the next day.
+- View trends over time and a weekly view of your steps and activity.
+- Download all your data as a spreadsheet file.
 
-## 📊 What it tracks
-
-Ten daily series feed the dashboard: HRV, resting heart rate, sleep score, time asleep,
-SpO₂, skin-temperature variation, respiratory rate, steps, and cardio load — plus a
-readiness score Grit derives itself rather than echoing the device's. Readiness starts
-from a baseline of 60 and moves with how far HRV (+/-26), resting HR (+/-20), and sleep
-(-18/+22) sit from their own means, clamped to 6–99. A score of 67+ reads as **Primed**,
-34+ as **Steady**, below that **Strained** — and the same band colors every metric card.
-
-Because it owns the raw series, Grit also surfaces things the consumer app won't: the
-Pearson correlation between last night's sleep and next-day readiness, HRV expressed as a
-z-score against your 30-day baseline, and a two-week resting-HR slope in bpm/week. The
-activity page charts your last seven days of steps against a weekly total and plots cardio
-load as training load. `/api/export` hands the whole thing back as CSV — one row per day,
-every metric a column.
-
-## 🛠️ Stack
-
-Next.js (App Router) and TypeScript, React 19, Neon Postgres with Drizzle ORM, Tailwind,
-hosted on Vercel and installable as a PWA. It's a personal single-user build, and a few
-Health API specifics (exact scope strings, data-type IDs, the webhook handshake) are still
-marked `TODO(verify)` against Google's reference until the v4 API is confirmed end to end.
+Sign-in is limited to approved Google accounts. Without a connected account, the app shows sample data marked "Demo data."
