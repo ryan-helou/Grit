@@ -4,7 +4,7 @@
 
 **A personal health dashboard that shows how recovered and ready you are each day, using data from a Fitbit device.**
 
-<!-- facts --><img alt="Device: Fitbit" src="https://img.shields.io/badge/Device-Fitbit-24292f?style=for-the-badge"> <img alt="Score from: heart + sleep data" src="https://img.shields.io/badge/Score_from-heart_%2B_sleep_data-24292f?style=for-the-badge"> <img alt="Syncs: every 3 hours" src="https://img.shields.io/badge/Syncs-every_3_hours-24292f?style=for-the-badge">
+<!-- facts --><img alt="Works with: Fitbit" src="https://img.shields.io/badge/Works_with-Fitbit-24292f?style=for-the-badge"> <img alt="Daily score: heart + sleep" src="https://img.shields.io/badge/Daily_score-heart_%2B_sleep-24292f?style=for-the-badge"> <img alt="Syncs: every 3 hours" src="https://img.shields.io/badge/Syncs-every_3_hours-24292f?style=for-the-badge">
 
 </div>
 
